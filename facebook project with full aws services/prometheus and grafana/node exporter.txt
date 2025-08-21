@@ -1,0 +1,33 @@
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: "prometheus"
+    static_configs:
+      - targets: ["localhost:9090"]
+
+  - job_name: "node_exporter_manual"
+    static_configs:
+      - targets: 
+          - "10.0.132.16:9100"           #your ip
+          - "10.0.137.150:9100"          #your ip
+          - "10.0.135.110:9100"          #your ip
+          - "10.0.143.97:9100"           #your ip
+
+  # Scrape ASG1 (facebookmainhomeasg)     #your asg name 
+  - job_name: "node_exporter_facebookmainhomeasg"        #your asg name 
+    ec2_sd_configs:
+      - region: eu-west-2
+        port: 9100
+        filters:
+          - name: tag:Name
+            values: ["facebookmainhomeasg"]           #your asg name 
+
+  # Scrape ASG2 (facebookloginbyasg)                     #your asg name 
+  - job_name: "node_exporter_facebookloginbyasg"                #your asg name 
+    ec2_sd_configs:
+      - region: eu-west-2
+        port: 9100
+        filters:
+          - name: tag:Name
+            values: ["facebookloginbyasg"]                 #your asg name 

@@ -1,0 +1,8 @@
+wget -O splunkforwarder-9.3.1-0b8d769cb912.x86_64.rpm "https://download.splunk.com/products/universalforwarder/releases/9.3.1/linux/splunkforwarder-9.3.1-0b8d769cb912.x86_64.rpm" && \
+sudo rpm -ivh splunkforwarder-9.3.1-0b8d769cb912.x86_64.rpm && \
+sudo /opt/splunkforwarder/bin/splunk start --accept-license && \
+sudo /opt/splunkforwarder/bin/splunk enable boot-start && \
+sudo /opt/splunkforwarder/bin/splunk add forward-server 3.10.116.139:9997 -auth admin:admin1234 && \    #change your ip
+sudo /opt/splunkforwarder/bin/splunk list forward-server && \
+sudo nano /opt/splunkforwarder/etc/system/local/inputs.conf && \
+sudo /opt/splunkforwarder/bin/splunk restart

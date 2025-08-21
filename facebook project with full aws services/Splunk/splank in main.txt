@@ -1,0 +1,46 @@
+Create ec2 with below specifications
+ 
+	Instance type is t2.medium
+ 
+	Select sg and allow all traffic
+	Take ebs volume 30gb
+ 
+	Connect to instance install splunk 
+wget -O splunk-9.3.1-0b8d769cb912.x86_64.rpm "https://download.splunk.com/products/splunk/releases/9.3.1/linux/splunk-9.3.1-0b8d769cb912.x86_64.rpm"
+ 
+	Install downloaded rpm package
+sudo yum install splunk-9.3.1-0b8d769cb912.x86_64.rpm -y 
+ 
+	Switch to root user then go to splunk bin directory
+ cd /opt/splunk/bin/
+ 
+	Strat the splunk
+sudo ./splunk start --accept-license --answer-yes
+	It will ask usename password
+Username :admin
+Password : admin1234   [give your custom password]
+
+ 
+	Successfully started the splunk
+ 
+	Enable the splunk
+./splunk enable boot-start
+ 
+	 the public ip and enter port
+	http://3.92.228.27:8000
+ 
+	enter the user name and password	
+ 
+	this is the dashboard of splunk 
+
+ 
+	click on settings
+	select server settings 
+ 
+	after selecting server settings
+	click on general settings
+ 
+	change free disk space 5000 to 500
+	than save it
+ 
+

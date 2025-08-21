@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Facebook Reel</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:400,500,700&display=swap">
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            background: #18191a;
+            color: #e4e6eb;
+            font-family: 'Roboto', Arial, sans-serif;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+        }
+        .fb-reel-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 56px;
+            background: #242526;
+            display: flex;
+            align-items: center;
+            z-index: 100;
+            box-shadow: 0 1px 0 #3a3b3c;
+        }
+        .fb-reel-header .logo {
+            margin-left: 24px;
+            font-size: 1.6em;
+            font-weight: 700;
+            color: #2e89ff;
+            letter-spacing: -1px;
+            display: flex;
+            align-items: center;
+        }
+        .fb-reel-header .logo svg {
+            margin-right: 8px;
+        }
+        .fb-reel-header .title {
+            font-size: 1.2em;
+            font-weight: 500;
+            margin-left: 12px;
+            color: #e4e6eb;
+        }
+        .fb-reel-header .spacer {
+            flex: 1;
+        }
+        .fb-reel-header .profile {
+            margin-right: 24px;
+            display: flex;
+            align-items: center;
+        }
+        .fb-reel-header .profile img {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #2e89ff;
+        }
+        .fb-reel-main {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #18191a;
+        }
+        .fb-reel-vertical-list {
+            width: 100vw;
+            height: 100vh;
+            max-width: 420px;
+            margin: 0 auto;
+            overflow-y: scroll !important;
+            scroll-snap-type: y mandatory !important;
+            position: relative;
+            background: #18191a;
+            -webkit-overflow-scrolling: touch;
+        }
+        .fb-reel-single {
+            position: relative;
+            width: 100vw;
+            max-width: 420px;
+            height: 100vh;
+            min-height: 100vh;
+            aspect-ratio: 9/16;
+            background: #000;
+            border-radius: 0;
+            overflow: hidden;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.4);
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            margin: 0 auto;
+            scroll-snap-align: start !important;
+        }
+        @media (max-width: 600px) {
+            .fb-reel-single {
+                width: 100vw;
+                height: 100vh;
+                min-width: 100vw;
+                min-height: 100vh;
+                border-radius: 0;
+            }
+            .fb-reel-vertical-list {
+                max-width: 100vw;
+            }
+        }
+        .fb-reel-video-wrapper {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0; left: 0;
+            z-index: 1;
+            background: #000;
+        }
+        .fb-reel-video-wrapper video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            background: #000;
+        }
+        .fb-reel-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            z-index: 2;
+            padding: 0 20px 12px 20px;
+            background: linear-gradient(0deg, rgba(24,25,26,0.95) 60%, rgba(24,25,26,0.0) 100%);
+            box-sizing: border-box;
+        }
+        .fb-reel-user-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        .fb-reel-user-row .profile-pic {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #2e89ff;
+            margin-right: 10px;
+        }
+        .fb-reel-user-row .username {
+            font-weight: 500;
+            font-size: 1.08em;
+            color: #e4e6eb;
+            margin-right: 10px;
+        }
+        .fb-reel-user-row .follow-btn {
+            background: #2e89ff;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            padding: 5px 16px;
+            font-weight: 500;
+            font-size: 0.98em;
+            cursor: pointer;
+            margin-left: auto;
+            transition: background 0.2s;
+        }
+        .fb-reel-user-row .follow-btn.following {
+            background: #3a3b3c;
+            color: #e4e6eb;
+            border: 1px solid #555;
+        }
+        .fb-reel-caption {
+            font-size: 1.05em;
+            margin-bottom: 8px;
+            color: #e4e6eb;
+            word-break: break-word;
+        }
+        .fb-reel-audio {
+            font-size: 0.95em;
+            color: #b0b3b8;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .fb-reel-audio .audio-icon {
+            font-size: 1.1em;
+        }
+        .fb-reel-actions {
+            display: flex;
+            align-items: center;
+            gap: 32px;
+            margin-bottom: 4px;
+        }
+        .fb-reel-action-btn {
+            background: none;
+            border: none;
+            color: #e4e6eb;
+            font-size: 1.25em;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: color 0.2s;
+            position: relative;
+        }
+        .fb-reel-action-btn.liked {
+            color: #e74c3c;
+        }
+        .fb-reel-action-btn:focus {
+            outline: none;
+        }
+        .fb-reel-action-count {
+            font-size: 0.98em;
+            margin-left: 2px;
+        }
+        .fb-reel-comment-popup {
+            position: fixed;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            background: #242526;
+            color: #e4e6eb;
+            border-radius: 12px;
+            box-shadow: 0 2px 24px rgba(0,0,0,0.7);
+            padding: 24px 20px 16px 20px;
+            z-index: 2000;
+            min-width: 340px;
+            max-width: 96vw;
+            max-height: 70vh;
+            overflow-y: auto;
+            display: none;
+        }
+        .fb-reel-comment-popup.active {
+            display: block;
+        }
+        .fb-reel-comment-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        .fb-reel-comment-header span {
+            font-weight: 500;
+            font-size: 1.1em;
+        }
+        .fb-reel-comment-close {
+            background: none;
+            border: none;
+            color: #e4e6eb;
+            font-size: 1.3em;
+            cursor: pointer;
+        }
+        .fb-reel-comment-list {
+            margin-bottom: 12px;
+            max-height: 220px;
+            overflow-y: auto;
+        }
+        .fb-reel-comment-item {
+            margin-bottom: 10px;
+            border-bottom: 1px solid #3a3b3c;
+            padding-bottom: 5px;
+        }
+        .fb-reel-comment-username {
+            font-weight: 500;
+            margin-right: 6px;
+            color: #2e89ff;
+        }
+        .fb-reel-comment-form {
+            display: flex;
+            gap: 6px;
+        }
+        .fb-reel-comment-input {
+            flex: 1;
+            padding: 7px 10px;
+            border-radius: 6px;
+            border: 1px solid #3a3b3c;
+            background: #18191a;
+            color: #e4e6eb;
+            font-size: 1em;
+        }
+        .fb-reel-comment-submit {
+            background: #2e89ff;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            padding: 7px 16px;
+            font-weight: 500;
+            cursor: pointer;
+            font-size: 1em;
+        }
+        @media (max-width: 600px) {
+            .fb-reel-single {
+                width: 100vw;
+                height: 100vh;
+                min-width: 100vw;
+                min-height: 100vh;
+                border-radius: 0;
+            }
+            .fb-reel-comment-popup {
+                min-width: 96vw;
+                max-width: 99vw;
+            }
+        }
+        /* Hide scrollbars for all browsers */
+        .fb-reel-vertical-list {
+            scrollbar-width: none; /* Firefox */
+            -ms-overflow-style: none;  /* IE 10+ */
+        }
+        .fb-reel-vertical-list::-webkit-scrollbar {
+            display: none; /* Chrome/Safari/Webkit */
+        }
+        body {
+            overflow: hidden !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="fb-reel-header">
+        <span class="logo">
+            <svg width="32" height="32" viewBox="0 0 36 36" fill="none"><circle cx="18" cy="18" r="18" fill="#2e89ff"/><path d="M23.5 18.5H20V28H16V18.5H13.5V15H16V13.25C16 10.9 17.19 9 20.04 9C21.22 9 22.25 9.09 22.5 9.13V12.25H20.98C19.92 12.25 20 12.7 20 13.5V15H22.5L22 18.5Z" fill="white"/></svg>
+            Facebook
+        </span>
+        <span class="title">Reels</span>
+        <span class="spacer"></span>
+        <span class="profile">
+            <img src="https://i.ibb.co/tpzStvsd/Screenshot-2024-03-10-150338.png" alt="Profile">
+        </span>
+    </div>
+    <div class="fb-reel-main">
+        <div class="fb-reel-vertical-list" id="fbReelVerticalList">
+            <!-- Reels will be rendered here -->
+        </div>
+    </div>
+    <div id="fbReelCommentPopup" class="fb-reel-comment-popup">
+        <div class="fb-reel-comment-header">
+            <span>Comments</span>
+            <button class="fb-reel-comment-close" id="fbReelCloseCommentPopup">&times;</button>
+        </div>
+        <div class="fb-reel-comment-list" id="fbReelCommentList"></div>
+        <form class="fb-reel-comment-form" id="fbReelCommentForm">
+            <input type="text" class="fb-reel-comment-input" id="fbReelCommentInput" placeholder="Write a comment..." maxlength="200" required>
+            <button type="submit" class="fb-reel-comment-submit">Post</button>
+        </form>
+    </div>
+    <script>
+        // Fallback videos with like/share/comment counts and comments
+        const fallbackVideos = [
+            {
+                url: "",
+                username: "_inspirelite._",
+                profilePic: "https://i.ibb.co/tpzStvsd/Screenshot-2024-03-10-150338.png",
+                caption: '"Be strong enough to stand alone, w... more',
+                audio: "Original audio",
+                likes: 12,
+                shares: 3,
+                comments: [
+                    { username: "user1", text: "So inspiring!" },
+                    { username: "user2", text: "Love this!" }
+                ]
+            },
+            {
+                url: "",
+                username: "motivator",
+                profilePic: "https://randomuser.me/api/portraits/men/32.jpg",
+                caption: '"Push yourself, because no one else is going to do it for you."',
+                audio: "Original audio",
+                likes: 8,
+                shares: 1,
+                comments: [
+                    { username: "user3", text: "Needed this today." }
+                ]
+            },
+            {
+                url: "",
+                username: "naturelover",
+                profilePic: "https://randomuser.me/api/portraits/women/44.jpg",
+                caption: '"Nature is not a place to visit. It is home."',
+                audio: "Original audio",
+                likes: 15,
+                shares: 2,
+                comments: []
+            }
+        ];
+
+        let videos = [];
+        let soundEnabled = true; // Changed to true to enable sound by default
+        let likedVideos = new Set();
+        let currentCommentVideoIdx = null;
+
+        // For navigation, keep track of which video is in view
+        let currentVideoIdx = 0;
+
+        function renderFbReelList() {
+            const list = document.getElementById('fbReelVerticalList');
+            list.innerHTML = '';
+            videos.forEach((videoData, index) => {
+                const reel = document.createElement('div');
+                reel.className = 'fb-reel-single';
+                reel.dataset.idx = index;
+
+                // Video wrapper
+                const videoWrapper = document.createElement('div');
+                videoWrapper.className = 'fb-reel-video-wrapper';
+                const video = document.createElement('video');
+                video.setAttribute('playsinline', '');
+                video.setAttribute('preload', 'auto');
+                video.setAttribute('loop', '');
+                video.src = videoData.url;
+                video.muted = !soundEnabled;
+                video.autoplay = true; // Set autoplay to true
+                videoWrapper.appendChild(video);
+
+                // Overlay
+                const overlay = document.createElement('div');
+                overlay.className = 'fb-reel-overlay';
+                overlay.innerHTML = `
+                    <div class="fb-reel-user-row">
+                        <img src="${videoData.profilePic}" alt="Profile" class="profile-pic">
+                        <span class="username">${videoData.username}</span>
+                        <button class="follow-btn">Follow</button>
+                    </div>
+                    <div class="fb-reel-caption">${videoData.caption}</div>
+                    <div class="fb-reel-audio">
+                        <span class="audio-icon">&#127925;</span>
+                        <span class="audio-text">${videoData.audio}</span>
+                    </div>
+                    <div class="fb-reel-actions">
+                        <button class="fb-reel-action-btn like-btn" title="Like" aria-label="Like">
+                            <svg width="1.3em" height="1.3em" viewBox="0 0 24 24" fill="none" style="vertical-align:middle;">
+                                <path d="M12.1 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41 0.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54l-1.35 1.31z" fill="currentColor"/>
+                            </svg>
+                            <span class="fb-reel-action-count like-count">${videoData.likes || 0}</span>
+                        </button>
+                        <button class="fb-reel-action-btn comment-btn" title="Comment" aria-label="Comment">
+                            <svg width="1.3em" height="1.3em" viewBox="0 0 24 24" fill="none" style="vertical-align:middle;">
+                                <path d="M21 6.5a2.5 2.5 0 0 0-2.5-2.5h-13A2.5 2.5 0 0 0 3 6.5v7A2.5 2.5 0 0 0 5.5 16H7v3.29c0 .45.54.67.85.35L11.29 16H18.5A2.5 2.5 0 0 0 21 13.5v-7z" fill="currentColor"/>
+                            </svg>
+                            <span class="fb-reel-action-count comment-count">${videoData.comments ? videoData.comments.length : 0}</span>
+                        </button>
+                        <button class="fb-reel-action-btn share-btn" title="Share" aria-label="Share">
+                            <!-- Changed share icon to a "paper plane" style -->
+                            <svg width="1.3em" height="1.3em" viewBox="0 0 24 24" fill="none" style="vertical-align:middle;">
+                                <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" fill="currentColor"/>
+                            </svg>
+                            <span class="fb-reel-action-count share-count">${videoData.shares || 0}</span>
+                        </button>
+                    </div>
+                `;
+
+                reel.appendChild(videoWrapper);
+                reel.appendChild(overlay);
+
+                // Video sound toggle on click
+                video.addEventListener('click', () => {
+                    if (!soundEnabled) {
+                        soundEnabled = true;
+                        // Unmute all videos
+                        document.querySelectorAll('.fb-reel-video-wrapper video').forEach(v => v.muted = false);
+                        video.muted = false;
+                        video.play().catch(()=>{});
+                    } else {
+                        soundEnabled = false;
+                        // Mute all videos
+                        document.querySelectorAll('.fb-reel-video-wrapper video').forEach(v => v.muted = true);
+                        video.muted = true;
+                    }
+                });
+
+                // Like button logic
+                const likeBtn = overlay.querySelector('.like-btn');
+                const likeCount = overlay.querySelector('.like-count');
+                if (likedVideos.has(index)) {
+                    likeBtn.classList.add('liked');
+                } else {
+                    likeBtn.classList.remove('liked');
+                }
+                likeBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    if (likedVideos.has(index)) {
+                        likedVideos.delete(index);
+                        likeBtn.classList.remove('liked');
+                        videos[index].likes = Math.max(0, (videos[index].likes || 0) - 1);
+                    } else {
+                        likedVideos.add(index);
+                        likeBtn.classList.add('liked');
+                        videos[index].likes = (videos[index].likes || 0) + 1;
+                    }
+                    likeCount.textContent = videos[index].likes;
+                });
+
+                // Comment button logic
+                const commentBtn = overlay.querySelector('.comment-btn');
+                commentBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    openFbReelCommentPopup(index);
+                });
+
+                // Share button logic
+                const shareBtn = overlay.querySelector('.share-btn');
+                const shareCount = overlay.querySelector('.share-count');
+                shareBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const shareUrl = videoData.url;
+                    if (navigator.share) {
+                        navigator.share({
+                            title: 'Check out this reel!',
+                            url: shareUrl
+                        }).then(() => {
+                            videos[index].shares = (videos[index].shares || 0) + 1;
+                            shareCount.textContent = videos[index].shares;
+                        }).catch(() => {});
+                    } else {
+                        copyToClipboard(shareUrl);
+                        alert('Link copied to clipboard!');
+                        videos[index].shares = (videos[index].shares || 0) + 1;
+                        shareCount.textContent = videos[index].shares;
+                    }
+                });
+
+                // Follow button logic
+                const followBtn = overlay.querySelector('.follow-btn');
+                followBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    if (followBtn.classList.contains('following')) {
+                        followBtn.classList.remove('following');
+                        followBtn.textContent = 'Follow';
+                    } else {
+                        followBtn.classList.add('following');
+                        followBtn.textContent = 'Following';
+                    }
+                });
+
+                list.appendChild(reel);
+            });
+        }
+
+        function copyToClipboard(text) {
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(text);
+            } else {
+                const tempInput = document.createElement('input');
+                tempInput.value = text;
+                document.body.appendChild(tempInput);
+                tempInput.select();
+                document.execCommand('copy');
+                document.body.removeChild(tempInput);
+            }
+        }
+
+        // Helper: get all reel elements and their videos
+        function getReelElements() {
+            const list = document.getElementById('fbReelVerticalList');
+            return Array.from(list.querySelectorAll('.fb-reel-single'));
+        }
+
+        // Play/pause videos based on scroll position
+        function handleReelScroll() {
+            const reels = getReelElements();
+            const list = document.getElementById('fbReelVerticalList');
+            const listRect = list.getBoundingClientRect();
+            let found = false;
+            reels.forEach((reel, idx) => {
+                const rect = reel.getBoundingClientRect();
+                const video = reel.querySelector('video');
+                // Check if the reel is mostly in the viewport
+                const visibleHeight = Math.min(rect.bottom, listRect.bottom) - Math.max(rect.top, listRect.top);
+                if (!found && visibleHeight > (rect.height * 0.5)) {
+                    // This is the current reel
+                    if (video.paused) {
+                        video.play().catch(()=>{});
+                    }
+                    // Always unmute if soundEnabled
+                    video.muted = !soundEnabled;
+                    currentVideoIdx = idx;
+                    found = true;
+                } else {
+                    if (!video.paused) {
+                        video.pause();
+                        video.currentTime = 0;
+                    }
+                }
+            });
+        }
+
+        // Keyboard navigation (up/down arrow)
+        document.addEventListener('keydown', function(e) {
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+            const list = document.getElementById('fbReelVerticalList');
+            const reels = getReelElements();
+            if (e.key === 'ArrowDown') {
+                if (currentVideoIdx < reels.length - 1) {
+                    reels[currentVideoIdx + 1].scrollIntoView({behavior: "smooth"});
+                }
+            } else if (e.key === 'ArrowUp') {
+                if (currentVideoIdx > 0) {
+                    reels[currentVideoIdx - 1].scrollIntoView({behavior: "smooth"});
+                }
+            }
+        });
+
+        // Scroll event for vertical list
+        document.addEventListener('DOMContentLoaded', function() {
+            const list = document.getElementById('fbReelVerticalList');
+            list.addEventListener('scroll', handleReelScroll, {passive: true});
+        });
+
+        // Comment popup logic
+        function openFbReelCommentPopup(videoIdx) {
+            currentCommentVideoIdx = videoIdx;
+            const popup = document.getElementById('fbReelCommentPopup');
+            const commentInput = document.getElementById('fbReelCommentInput');
+            commentInput.value = '';
+            renderFbReelCommentList();
+            popup.classList.add('active');
+            commentInput.focus();
+        }
+
+        function closeFbReelCommentPopup() {
+            document.getElementById('fbReelCommentPopup').classList.remove('active');
+            currentCommentVideoIdx = null;
+        }
+
+        function renderFbReelCommentList() {
+            const commentList = document.getElementById('fbReelCommentList');
+            commentList.innerHTML = '';
+            if (currentCommentVideoIdx === null) return;
+            const comments = videos[currentCommentVideoIdx].comments || [];
+            if (comments.length === 0) {
+                commentList.innerHTML = '<div style="color:#b0b3b8;">No comments yet.</div>';
+            } else {
+                comments.forEach(c => {
+                    const div = document.createElement('div');
+                    div.className = 'fb-reel-comment-item';
+                    div.innerHTML = `<span class="fb-reel-comment-username">${c.username}</span>${c.text}`;
+                    commentList.appendChild(div);
+                });
+            }
+        }
+
+        document.getElementById('fbReelCloseCommentPopup').onclick = closeFbReelCommentPopup;
+
+        document.getElementById('fbReelCommentForm').onsubmit = function(e) {
+            e.preventDefault();
+            const input = document.getElementById('fbReelCommentInput');
+            const text = input.value.trim();
+            if (!text || currentCommentVideoIdx === null) return;
+            // For demo, use a static username
+            const username = "You";
+            videos[currentCommentVideoIdx].comments = videos[currentCommentVideoIdx].comments || [];
+            videos[currentCommentVideoIdx].comments.push({ username, text });
+            // Update comment count in UI
+            // Find the correct overlay for the current video
+            const list = document.getElementById('fbReelVerticalList');
+            const reel = list.querySelector(`.fb-reel-single[data-idx="${currentCommentVideoIdx}"]`);
+            if (reel) {
+                const overlay = reel.querySelector('.fb-reel-overlay');
+                if (overlay) {
+                    const commentCount = overlay.querySelector('.comment-count');
+                    commentCount.textContent = videos[currentCommentVideoIdx].comments.length;
+                }
+            }
+            renderFbReelCommentList();
+            input.value = '';
+        };
+
+        // Close popup on outside click
+        window.addEventListener('mousedown', function(e) {
+            const popup = document.getElementById('fbReelCommentPopup');
+            if (popup.classList.contains('active') && !popup.contains(e.target)) {
+                closeFbReelCommentPopup();
+            }
+        });
+
+        async function loadVideos() {
+            videos = fallbackVideos.map(v => ({...v})); // Deep copy for demo
+            renderFbReelList();
+            setTimeout(() => {
+                // Scroll to top and play first video
+                document.getElementById('fbReelVerticalList').scrollTop = 0;
+                handleReelScroll();
+            }, 100);
+            try {
+                const res = await fetch("http://back-222-1519302555.eu-west-2.elb.amazonaws.com/videos", { cache: "no-store" });
+                const apiVideos = await res.json();
+                if (Array.isArray(apiVideos) && apiVideos.length > 0) {
+                    videos = apiVideos.map((url, idx) => ({
+                        url,
+                        username: fallbackVideos[idx % fallbackVideos.length].username,
+                        profilePic: fallbackVideos[idx % fallbackVideos.length].profilePic,
+                        caption: fallbackVideos[idx % fallbackVideos.length].caption,
+                        audio: fallbackVideos[idx % fallbackVideos.length].audio,
+                        likes: fallbackVideos[idx % fallbackVideos.length].likes || 0,
+                        shares: fallbackVideos[idx % fallbackVideos.length].shares || 0,
+                        comments: (fallbackVideos[idx % fallbackVideos.length].comments || []).slice()
+                    }));
+                    renderFbReelList();
+                    setTimeout(() => {
+                        document.getElementById('fbReelVerticalList').scrollTop = 0;
+                        handleReelScroll();
+                    }, 100);
+                }
+            } catch {
+                console.warn("API fetch failed, using fallback only");
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', loadVideos);
+
+        // Try to resume audio playback if browser blocks autoplay with sound
+        document.addEventListener('DOMContentLoaded', function() {
+            // Try to play the first video with sound
+            setTimeout(() => {
+                const firstVideo = document.querySelector('.fb-reel-video-wrapper video');
+                if (firstVideo) {
+                    firstVideo.muted = false;
+                    firstVideo.play().catch(() => {
+                        // If autoplay with sound is blocked, wait for user interaction
+                        const enableSound = () => {
+                            document.querySelectorAll('.fb-reel-video-wrapper video').forEach(v => {
+                                v.muted = false;
+                                v.play().catch(()=>{});
+                            });
+                            soundEnabled = true;
+                            window.removeEventListener('click', enableSound);
+                            window.removeEventListener('touchstart', enableSound);
+                        };
+                        window.addEventListener('click', enableSound);
+                        window.addEventListener('touchstart', enableSound);
+                    });
+                }
+            }, 300);
+        });
+    </script>
+</body>
+</html>

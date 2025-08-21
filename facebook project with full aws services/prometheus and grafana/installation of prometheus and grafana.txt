@@ -1,0 +1,61 @@
+#!/bin/bash
+# Update system
+sudo yum update -y
+
+# Install Prometheus
+useradd --no-create-home --shell /bin/false prometheus
+mkdir /etc/prometheus /var/lib/prometheus
+
+cd /tmp
+curl -LO https://github.com/prometheus/prometheus/releases/download/v2.52.0/prometheus-2.52.0.linux-amd64.tar.gz
+tar xvf prometheus-2.52.0.linux-amd64.tar.gz
+cd prometheus-2.52.0.linux-amd64
+
+cp prometheus promtool /usr/local/bin/
+cp -r consoles console_libraries /etc/prometheus/
+cp prometheus.yml /etc/prometheus/
+
+chown -R prometheus:prometheus /etc/prometheus /var/lib/prometheus
+
+# Configure Prometheus to scrape node exporters
+cat <<EOF >/etc/prometheus/prometheus.yml
+global:
+  scrape_interval: 15s
+scrape_configs:
+  - job_name: "prometheus"
+    static_configs:
+      - targets: ["localhost:9090"]
+
+  - job_name: "node_exporter"
+    static_configs:
+      - targets: ["<NODE-ASG-PRIVATE-IP-1>:9100", "<NODE-ASG-PRIVATE-IP-2>:9100"]
+EOF
+
+# Systemd service
+cat <<EOF >/etc/systemd/system/prometheus.service
+[Unit]
+Description=Prometheus
+After=network.target
+
+[Service]
+User=prometheus
+ExecStart=/usr/local/bin/prometheus \
+  --config.file=/etc/prometheus/prometheus.yml \
+  --storage.tsdb.path=/var/lib/prometheus
+
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+systemctl daemon-reload
+systemctl enable prometheus
+systemctl start prometheus
+
+# Install Grafana
+sudo yum install -y wget
+wget https://dl.grafana.com/oss/release/grafana-11.0.0-1.x86_64.rpm
+sudo yum install -y grafana-11.0.0-1.x86_64.rpm
+systemctl enable grafana-server
+systemctl start grafana-server
